@@ -41,6 +41,10 @@ Ce script batch Windows, est conçu pour effectuer un nettoyage sécurisé du sy
 
 Ce script est utile pour automatiser le nettoyage de Windows, mais il doit être utilisé avec précaution. Il est recommandé de vérifier les chemins et les fichiers ciblés avant l'exécution pour éviter toute suppression accidentelle de données importantes.
 
+### Informations
+
+Ce script n'est pas associé à Microsoft. Il a été développé indépendamment et n'a aucune affiliation avec Microsoft ou ses produits. Pour toute question ou support concernant ce script, veuillez contacter son auteur ou consulter la documentation associée.
+
 --------------------------------------------------------------------------------------------------------------------------------------
 
 ## <strong>❤️</strong> (Contribuer) <strong>❤️</strong>
