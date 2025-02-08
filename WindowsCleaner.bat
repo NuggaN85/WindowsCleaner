@@ -1,6 +1,6 @@
 @echo off
 rem Script de nettoyage Windows avec point de restauration.
-rem Développé par : RL Informatique
+rem Développé par : RL Informatique.
 
 cls
 
