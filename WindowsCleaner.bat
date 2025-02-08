@@ -1,6 +1,6 @@
 @echo off
-rem Script de nettoyage Windows avec point de restauration - Écrit par RL Informatique - Publié en 2025
-rem Contact : rl-informatique@ik.me
+rem Script de nettoyage Windows avec point de restauration.
+rem Développé par : RL Informatique
 
 cls
 
