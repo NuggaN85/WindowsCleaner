@@ -111,6 +111,13 @@ rem Nettoyage des fichiers de cache du système
 echo Nettoyage des fichiers de cache du système...
 cleanmgr /sagerun:1
 
+rem Suppression des fichiers et cache de Microsoft Defender
+echo Suppression des fichiers et cache de Microsoft Defender...
+"%SYSTEMDRIVE%\Tools\sdelete.exe" -s -r "%ProgramData%\Microsoft\Windows Defender\Scans\History\Service"
+"%SYSTEMDRIVE%\Tools\sdelete.exe" -s -r "%ProgramData%\Microsoft\Windows Defender\Scans\History\Results\Service"
+"%SYSTEMDRIVE%\Tools\sdelete.exe" -s -r "%ProgramData%\Microsoft\Windows Defender\Scans\History\Results\Quick"
+"%SYSTEMDRIVE%\Tools\sdelete.exe" -s -r "%ProgramData%\Microsoft\Windows Defender\Scans\History\Results\Full"
+
 echo.
 echo Nettoyage sécurisé de Windows terminé !
 
