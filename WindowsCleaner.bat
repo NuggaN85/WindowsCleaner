@@ -121,6 +121,10 @@ echo Suppression des fichiers et cache de Microsoft Defender...
 echo.
 echo Nettoyage sécurisé de Windows terminé !
 
+rem Vérification de l'intégrité des fichiers système avec SFC
+echo Vérification de l'intégrité des fichiers système avec SFC...
+sfc /scannow
+
 rem Demander à l'utilisateur s'il souhaite redémarrer l'ordinateur
 set /p reboot=Voulez-vous redémarrer l'ordinateur maintenant ? (oui/non) :
 if /i "%reboot%"=="oui" (
