@@ -26,6 +26,8 @@ Ce script batch Windows, est conçu pour effectuer un nettoyage sécurisé du sy
 
 11. **Nettoyage des Fichiers de Cache du Système** : Utilise l'outil de nettoyage de disque intégré de Windows pour supprimer les fichiers de cache système.
 
+12. **Nettoyage des fichiers et cache de Microsoft Defender** : Supprime les fichiers et cache de Microsoft Defender.
+
 ### Sécurité du Script
 
 - **Vérification des Privilèges** : Le script s'assure qu'il est exécuté avec des privilèges administratifs pour éviter des erreurs d'exécution.
