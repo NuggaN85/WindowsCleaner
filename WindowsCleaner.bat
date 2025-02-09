@@ -39,10 +39,15 @@ del "SDelete.zip"
 
 echo.
 
-rem Créer un point de restauration
-echo Création d'un point de restauration...
-wmic.exe /Namespace:\\root\default Path SystemRestore Call CreateRestorePoint "Point de restauration avant nettoyage", 100, 7
-echo Point de restauration créé.
+rem Demander à l'utilisateur s'il souhaite créer un point de restauration
+set /p createRestorePoint=Voulez-vous créer un point de restauration avant le nettoyage ? (oui/non) :
+if /i "%createRestorePoint%"=="oui" (
+    echo Création d'un point de restauration...
+    wmic.exe /Namespace:\\root\default Path SystemRestore Call CreateRestorePoint "Point de restauration avant nettoyage", 100, 7
+    echo Point de restauration créé.
+) else (
+    echo Aucun point de restauration créé.
+)
 
 echo.
 
@@ -107,8 +112,16 @@ echo Nettoyage des fichiers de cache du système...
 cleanmgr /sagerun:1
 
 echo.
-echo Nettoyage sécurisé de Windows terminé ! Appuyez sur une touche pour quitter.
-echo.
+echo Nettoyage sécurisé de Windows terminé !
 
-pause > NUL
+rem Demander à l'utilisateur s'il souhaite redémarrer l'ordinateur
+set /p reboot=Voulez-vous redémarrer l'ordinateur maintenant ? (oui/non) :
+if /i "%reboot%"=="oui" (
+    echo Redémarrage de l'ordinateur...
+    shutdown /r /t 0
+) else (
+    echo Appuyez sur une touche pour quitter.
+    pause > NUL
+)
+
 exit /b 0
