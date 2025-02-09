@@ -51,33 +51,49 @@ if /i "%createRestorePoint%"=="oui" (
 
 echo.
 
-rem Supprimer les fichiers temporaires de manière sécurisée
-echo Nettoyage sécurisé des fichiers temporaires...
-"%SYSTEMDRIVE%\Tools\sdelete.exe" -s -q "%WinDir%\Temp\*.*"
-"%SYSTEMDRIVE%\Tools\sdelete.exe" -s -q "%WinDir%\Prefetch\*.*"
-"%SYSTEMDRIVE%\Tools\sdelete.exe" -s -q "%Temp%\*.*"
-"%SYSTEMDRIVE%\Tools\sdelete.exe" -s -q "%AppData%\Temp\*.*"
-"%SYSTEMDRIVE%\Tools\sdelete.exe" -s -q "%HomePath%\AppData\LocalLow\Temp\*.*"
+rem Demander à l'utilisateur quelles étapes de nettoyage exécuter
+set /p cleanTemp=Nettoyer les fichiers temporaires ? (oui/non) :
+set /p cleanDrivers=Nettoyer les fichiers de pilotes inutiles ? (oui/non) :
+set /p cleanOffice=Nettoyer les fichiers temporaires de Microsoft Office ? (oui/non) :
+set /p optimizeSSD=Optimiser les SSD ? (oui/non) :
 
-rem Supprimer les fichiers des pilotes inutiles (déjà installés) de manière sécurisée
-echo Nettoyage sécurisé des fichiers de pilotes inutiles...
-"%SYSTEMDRIVE%\Tools\sdelete.exe" -s -q "%SYSTEMDRIVE%\AMD\*.*"
-"%SYSTEMDRIVE%\Tools\sdelete.exe" -s -q "%SYSTEMDRIVE%\NVIDIA\*.*"
-"%SYSTEMDRIVE%\Tools\sdelete.exe" -s -q "%SYSTEMDRIVE%\INTEL\*.*"
+rem Créer un fichier de log
+set logFile=%USERPROFILE%\Desktop\nettoyage_log.txt
+echo Début du nettoyage > "%logFile%"
 
-rem Supprimer les dossiers temporaires de manière sécurisée
-echo Suppression sécurisée des dossiers temporaires...
-"%SYSTEMDRIVE%\Tools\sdelete.exe" -s -r "%WinDir%\Temp"
-"%SYSTEMDRIVE%\Tools\sdelete.exe" -s -r "%WinDir%\Prefetch"
-"%SYSTEMDRIVE%\Tools\sdelete.exe" -s -r "%Temp%"
-"%SYSTEMDRIVE%\Tools\sdelete.exe" -s -r "%AppData%\Temp"
-"%SYSTEMDRIVE%\Tools\sdelete.exe" -s -r "%HomePath%\AppData\LocalLow\Temp"
+rem Nettoyage des fichiers temporaires
+if /i "%cleanTemp%"=="oui" (
+    echo Nettoyage sécurisé des fichiers temporaires...
+    "%SYSTEMDRIVE%\Tools\sdelete.exe" -s -q "%WinDir%\Temp\*.*"
+    "%SYSTEMDRIVE%\Tools\sdelete.exe" -s -q "%WinDir%\Prefetch\*.*"
+    "%SYSTEMDRIVE%\Tools\sdelete.exe" -s -q "%Temp%\*.*"
+    "%SYSTEMDRIVE%\Tools\sdelete.exe" -s -q "%AppData%\Temp\*.*"
+    "%SYSTEMDRIVE%\Tools\sdelete.exe" -s -q "%HomePath%\AppData\LocalLow\Temp\*.*"
+    echo Fichiers temporaires nettoyés >> "%logFile%"
+)
 
-rem Supprimer les dossiers des pilotes inutiles (déjà installés) de manière sécurisée
-echo Suppression sécurisée des dossiers de pilotes inutiles...
-"%SYSTEMDRIVE%\Tools\sdelete.exe" -s -r "%SYSTEMDRIVE%\AMD"
-"%SYSTEMDRIVE%\Tools\sdelete.exe" -s -r "%SYSTEMDRIVE%\NVIDIA"
-"%SYSTEMDRIVE%\Tools\sdelete.exe" -s -r "%SYSTEMDRIVE%\INTEL"
+rem Nettoyage des fichiers de pilotes inutiles
+if /i "%cleanDrivers%"=="oui" (
+    echo Nettoyage sécurisé des fichiers de pilotes inutiles...
+    "%SYSTEMDRIVE%\Tools\sdelete.exe" -s -q "%SYSTEMDRIVE%\AMD\*.*"
+    "%SYSTEMDRIVE%\Tools\sdelete.exe" -s -q "%SYSTEMDRIVE%\NVIDIA\*.*"
+    "%SYSTEMDRIVE%\Tools\sdelete.exe" -s -q "%SYSTEMDRIVE%\INTEL\*.*"
+    echo Fichiers de pilotes inutiles nettoyés >> "%logFile%"
+)
+
+rem Nettoyage des fichiers temporaires de Microsoft Office
+if /i "%cleanOffice%"=="oui" (
+    echo Nettoyage des fichiers temporaires de Microsoft Office...
+    "%SYSTEMDRIVE%\Tools\sdelete.exe" -s -r "%LocalAppData%\Microsoft\Office\*.*"
+    echo Fichiers temporaires de Microsoft Office nettoyés >> "%logFile%"
+)
+
+rem Optimisation des SSD
+if /i "%optimizeSSD%"=="oui" (
+    echo Optimisation des SSD...
+    PowerShell -Command "Optimize-Volume -DriveLetter C -ReTrim -Verbose"
+    echo SSD optimisés >> "%logFile%"
+)
 
 rem Recréer les dossiers temporaires vides
 echo Recréation des dossiers temporaires...
@@ -134,5 +150,7 @@ if /i "%reboot%"=="oui" (
     echo Appuyez sur une touche pour quitter.
     pause > NUL
 )
+
+echo Fin du nettoyage >> "%logFile%"
 
 exit /b 0
