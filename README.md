@@ -28,6 +28,14 @@ Ce script batch Windows, est conçu pour effectuer un nettoyage sécurisé du sy
 
 12. **Nettoyage des fichiers et cache de Microsoft Defender** : Supprime les fichiers et cache de Microsoft Defender.
 
+13. **Nettoyage Microsoft Office** : Ajout d'une étape pour nettoyer les fichiers temporaires de Microsoft Office.
+
+14. **Optimisation des SSD** : Ajout d'une commande PowerShell pour optimiser les SSD.
+
+15. **Choix des étapes de nettoyage** : L'utilisateur peut choisir quelles étapes de nettoyage exécuter.
+
+16. **Fichier de log** : Création d'un fichier de log sur le bureau pour enregistrer les actions effectuées par le script.
+
 ### Sécurité du Script
 
 - **Vérification des Privilèges** : Le script s'assure qu'il est exécuté avec des privilèges administratifs pour éviter des erreurs d'exécution.
