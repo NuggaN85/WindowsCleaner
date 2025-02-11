@@ -53,94 +53,79 @@ if "%CHOICE%"=="" (
     goto END
 )
 
-:: Nettoyage des fichiers temporaires
-if "%CHOICE:~0,1%"=="1" OR "%CHOICE%"=="13" (
-    echo Nettoyage des fichiers temporaires... >> %LOGFILE%
-    rd /s /q %TEMP%
-    md %TEMP%
-    echo Fichiers temporaires nettoyés. >> %LOGFILE%
-)
-
-:: Nettoyage des fichiers de pilotes inutiles
-if "%CHOICE:~2,1%"=="2" OR "%CHOICE%"=="13" (
-    echo Nettoyage des fichiers de pilotes inutiles... >> %LOGFILE%
-    pnputil.exe /delete-driver
-    echo Fichiers de pilotes inutiles nettoyés. >> %LOGFILE%
-)
-
-:: Nettoyage des fichiers temporaires de Microsoft Office
-if "%CHOICE:~4,1%"=="3" OR "%CHOICE%"=="13" (
-    echo Nettoyage des fichiers temporaires de Microsoft Office... >> %LOGFILE%
-    rd /s /q %USERPROFILE%\AppData\Local\Temp\Office
-    echo Fichiers temporaires de Microsoft Office nettoyés. >> %LOGFILE%
-)
-
-:: Optimisation des SSD
-if "%CHOICE:~6,1%"=="4" OR "%CHOICE%"=="13" (
-    echo Optimisation des SSD... >> %LOGFILE%
-    defrag /C /O
-    echo SSD optimisés. >> %LOGFILE%
-)
-
-:: Nettoyage des journaux d'événements
-if "%CHOICE:~8,1%"=="5" OR "%CHOICE%"=="13" (
-    echo Nettoyage des journaux d'événements... >> %LOGFILE%
-    wevtutil.exe clear-log Application
-    wevtutil.exe clear-log System
-    wevtutil.exe clear-log Security
-    echo Journaux d'événements nettoyés. >> %LOGFILE%
-)
-
-:: Nettoyage des fichiers de mise à jour Windows
-if "%CHOICE:~10,1%"=="6" OR "%CHOICE%"=="13" (
-    echo Nettoyage des fichiers de mise à jour Windows... >> %LOGFILE%
-    dism /Online /Cleanup-Image /StartComponentCleanup
-    echo Fichiers de mise à jour Windows nettoyés. >> %LOGFILE%
-)
-
-:: Vider la corbeille
-if "%CHOICE:~12,1%"=="7" OR "%CHOICE%"=="13" (
-    echo Vidage de la corbeille... >> %LOGFILE%
-    rd /s /q %SYSTEMDRIVE%\$Recycle.bin
-    echo Corbeille vidée. >> %LOGFILE%
-)
-
-:: Vider le cache DNS
-if "%CHOICE:~14,1%"=="8" OR "%CHOICE%"=="13" (
-    echo Vidage du cache DNS... >> %LOGFILE%
-    ipconfig /flushdns
-    echo Cache DNS vidé. >> %LOGFILE%
-)
-
-:: Nettoyage des fichiers de cache du navigateur
-if "%CHOICE:~16,1%"=="9" OR "%CHOICE%"=="13" (
-    echo Nettoyage des fichiers de cache du navigateur... >> %LOGFILE%
-    rd /s /q "%LOCALAPPDATA%\Google\Chrome\User Data\Default\Cache"
-    rd /s /q "%LOCALAPPDATA%\Mozilla\Firefox\Profiles"
-    rd /s /q "%LOCALAPPDATA%\Microsoft\Edge\User Data\Default\Cache"
-    echo Fichiers de cache du navigateur nettoyés. >> %LOGFILE%
-)
-
-:: Nettoyage des fichiers de cache du système
-if "%CHOICE:~18,1%"=="10" OR "%CHOICE%"=="13" (
-    echo Nettoyage des fichiers de cache du système... >> %LOGFILE%
-    rd /s /q %WINDIR%\Temp
-    md %WINDIR%\Temp
-    echo Fichiers de cache du système nettoyés. >> %LOGFILE%
-)
-
-:: Suppression des fichiers et cache de Microsoft Defender
-if "%CHOICE:~20,1%"=="11" OR "%CHOICE%"=="13" (
-    echo Suppression des fichiers et cache de Microsoft Defender... >> %LOGFILE%
-    MpCmdRun.exe -RemoveDefinitions -All
-    echo Fichiers et cache de Microsoft Defender supprimés. >> %LOGFILE%
-)
-
-:: Vérification de l'intégrité des fichiers système avec SFC
-if "%CHOICE:~22,1%"=="12" OR "%CHOICE%"=="13" (
-    echo Vérification de l'intégrité des fichiers système avec SFC... >> %LOGFILE%
-    sfc /scannow
-    echo Vérification de l'intégrité des fichiers système terminée. >> %LOGFILE%
+:: Vérifier chaque choix individuellement
+for %%C in (%CHOICE%) do (
+    if "%%C"=="1" (
+        echo Nettoyage des fichiers temporaires... >> %LOGFILE%
+        rd /s /q %TEMP%
+        md %TEMP%
+        echo Fichiers temporaires nettoyés. >> %LOGFILE%
+    )
+    if "%%C"=="2" (
+        echo Nettoyage des fichiers de pilotes inutiles... >> %LOGFILE%
+        pnputil.exe /delete-driver
+        echo Fichiers de pilotes inutiles nettoyés. >> %LOGFILE%
+    )
+    if "%%C"=="3" (
+        echo Nettoyage des fichiers temporaires de Microsoft Office... >> %LOGFILE%
+        rd /s /q %USERPROFILE%\AppData\Local\Temp\Office
+        echo Fichiers temporaires de Microsoft Office nettoyés. >> %LOGFILE%
+    )
+    if "%%C"=="4" (
+        echo Optimisation des SSD... >> %LOGFILE%
+        defrag /C /O
+        echo SSD optimisés. >> %LOGFILE%
+    )
+    if "%%C"=="5" (
+        echo Nettoyage des journaux d'événements... >> %LOGFILE%
+        wevtutil.exe clear-log Application
+        wevtutil.exe clear-log System
+        wevtutil.exe clear-log Security
+        echo Journaux d'événements nettoyés. >> %LOGFILE%
+    )
+    if "%%C"=="6" (
+        echo Nettoyage des fichiers de mise à jour Windows... >> %LOGFILE%
+        dism /Online /Cleanup-Image /StartComponentCleanup
+        echo Fichiers de mise à jour Windows nettoyés. >> %LOGFILE%
+    )
+    if "%%C"=="7" (
+        echo Vidage de la corbeille... >> %LOGFILE%
+        rd /s /q %SYSTEMDRIVE%\$Recycle.bin
+        echo Corbeille vidée. >> %LOGFILE%
+    )
+    if "%%C"=="8" (
+        echo Vidage du cache DNS... >> %LOGFILE%
+        ipconfig /flushdns
+        echo Cache DNS vidé. >> %LOGFILE%
+    )
+    if "%%C"=="9" (
+        echo Nettoyage des fichiers de cache du navigateur... >> %LOGFILE%
+        rd /s /q "%LOCALAPPDATA%\Google\Chrome\User Data\Default\Cache"
+        rd /s /q "%LOCALAPPDATA%\Mozilla\Firefox\Profiles"
+        rd /s /q "%LOCALAPPDATA%\Microsoft\Edge\User Data\Default\Cache"
+        echo Fichiers de cache du navigateur nettoyés. >> %LOGFILE%
+    )
+    if "%%C"=="10" (
+        echo Nettoyage des fichiers de cache du système... >> %LOGFILE%
+        rd /s /q %WINDIR%\Temp
+        md %WINDIR%\Temp
+        echo Fichiers de cache du système nettoyés. >> %LOGFILE%
+    )
+    if "%%C"=="11" (
+        echo Suppression des fichiers et cache de Microsoft Defender... >> %LOGFILE%
+        MpCmdRun.exe -RemoveDefinitions -All
+        echo Fichiers et cache de Microsoft Defender supprimés. >> %LOGFILE%
+    )
+    if "%%C"=="12" (
+        echo Vérification de l'intégrité des fichiers système avec SFC... >> %LOGFILE%
+        sfc /scannow
+        echo Vérification de l'intégrité des fichiers système terminée. >> %LOGFILE%
+    )
+    if "%%C"=="13" (
+        :: Exécuter toutes les étapes
+        echo Exécution de toutes les étapes... >> %LOGFILE%
+        call :EXECUTE_ALL
+    )
 )
 
 :: Fin du nettoyage
@@ -159,3 +144,61 @@ if /I "%RESTART%"=="O" (
 
 :: Fin du script
 exit
+
+:: Sous-routine pour exécuter toutes les étapes
+:EXECUTE_ALL
+echo Nettoyage des fichiers temporaires... >> %LOGFILE%
+rd /s /q %TEMP%
+md %TEMP%
+echo Fichiers temporaires nettoyés. >> %LOGFILE%
+
+echo Nettoyage des fichiers de pilotes inutiles... >> %LOGFILE%
+pnputil.exe /delete-driver
+echo Fichiers de pilotes inutiles nettoyés. >> %LOGFILE%
+
+echo Nettoyage des fichiers temporaires de Microsoft Office... >> %LOGFILE%
+rd /s /q %USERPROFILE%\AppData\Local\Temp\Office
+echo Fichiers temporaires de Microsoft Office nettoyés. >> %LOGFILE%
+
+echo Optimisation des SSD... >> %LOGFILE%
+defrag /C /O
+echo SSD optimisés. >> %LOGFILE%
+
+echo Nettoyage des journaux d'événements... >> %LOGFILE%
+wevtutil.exe clear-log Application
+wevtutil.exe clear-log System
+wevtutil.exe clear-log Security
+echo Journaux d'événements nettoyés. >> %LOGFILE%
+
+echo Nettoyage des fichiers de mise à jour Windows... >> %LOGFILE%
+dism /Online /Cleanup-Image /StartComponentCleanup
+echo Fichiers de mise à jour Windows nettoyés. >> %LOGFILE%
+
+echo Vidage de la corbeille... >> %LOGFILE%
+rd /s /q %SYSTEMDRIVE%\$Recycle.bin
+echo Corbeille vidée. >> %LOGFILE%
+
+echo Vidage du cache DNS... >> %LOGFILE%
+ipconfig /flushdns
+echo Cache DNS vidé. >> %LOGFILE%
+
+echo Nettoyage des fichiers de cache du navigateur... >> %LOGFILE%
+rd /s /q "%LOCALAPPDATA%\Google\Chrome\User Data\Default\Cache"
+rd /s /q "%LOCALAPPDATA%\Mozilla\Firefox\Profiles"
+rd /s /q "%LOCALAPPDATA%\Microsoft\Edge\User Data\Default\Cache"
+echo Fichiers de cache du navigateur nettoyés. >> %LOGFILE%
+
+echo Nettoyage des fichiers de cache du système... >> %LOGFILE%
+rd /s /q %WINDIR%\Temp
+md %WINDIR%\Temp
+echo Fichiers de cache du système nettoyés. >> %LOGFILE%
+
+echo Suppression des fichiers et cache de Microsoft Defender... >> %LOGFILE%
+MpCmdRun.exe -RemoveDefinitions -All
+echo Fichiers et cache de Microsoft Defender supprimés. >> %LOGFILE%
+
+echo Vérification de l'intégrité des fichiers système avec SFC... >> %LOGFILE%
+sfc /scannow
+echo Vérification de l'intégrité des fichiers système terminée. >> %LOGFILE%
+
+exit /b
