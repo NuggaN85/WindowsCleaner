@@ -61,6 +61,9 @@ rem Créer un fichier de log
 set logFile=%USERPROFILE%\Desktop\nettoyage_log.txt
 echo Début du nettoyage > "%logFile%"
 
+rem Obtenir l'espace libre avant le nettoyage
+for /f "tokens=3" %%a in ('PowerShell -Command "Get-PSDrive C | Select-Object -ExpandProperty Free"') do set freeSpaceBefore=%%a
+
 rem Nettoyage des fichiers temporaires
 if /i "%cleanTemp%"=="oui" (
     echo Nettoyage sécurisé des fichiers temporaires...
@@ -134,8 +137,18 @@ echo Suppression des fichiers et cache de Microsoft Defender...
 "%SYSTEMDRIVE%\Tools\sdelete.exe" -s -r "%ProgramData%\Microsoft\Windows Defender\Scans\History\Results\Quick"
 "%SYSTEMDRIVE%\Tools\sdelete.exe" -s -r "%ProgramData%\Microsoft\Windows Defender\Scans\History\Results\Full"
 
+rem Obtenir l'espace libre après le nettoyage
+for /f "tokens=3" %%a in ('PowerShell -Command "Get-PSDrive C | Select-Object -ExpandProperty Free"') do set freeSpaceAfter=%%a
+
+rem Calculer l'espace récupéré
+set /a reclaimedSpace=%freeSpaceAfter%-%freeSpaceBefore%
+
 echo.
 echo Nettoyage sécurisé de Windows terminé !
+echo Espace récupéré : %reclaimedSpace% octets
+
+rem Ajouter l'espace récupéré au fichier de log
+echo Espace récupéré : %reclaimedSpace% octets >> "%logFile%"
 
 rem Vérification de l'intégrité des fichiers système avec SFC
 echo Vérification de l'intégrité des fichiers système avec SFC...
