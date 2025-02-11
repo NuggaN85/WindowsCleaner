@@ -21,6 +21,18 @@ if %errorlevel%==0 (
 
 echo.
 
+rem Demander à l'utilisateur s'il souhaite créer un point de restauration
+set /p createRestorePoint=Voulez-vous créer un point de restauration avant le nettoyage ? (oui/non) :
+if /i "%createRestorePoint%"=="oui" (
+    echo Création d'un point de restauration...
+    wmic.exe /Namespace:\\root\default Path SystemRestore Call CreateRestorePoint "Point de restauration avant nettoyage", 100, 7
+    echo Point de restauration créé.
+) else (
+    echo Aucun point de restauration créé.
+)
+
+echo.
+
 rem Télécharger sdelete et le dézipper
 echo Téléchargement de sdelete...
 PowerShell -Command "Invoke-WebRequest -Uri 'https://download.sysinternals.com/files/SDelete.zip' -OutFile 'SDelete.zip'"
@@ -36,18 +48,6 @@ PowerShell -Command "Expand-Archive -Path 'SDelete.zip' -DestinationPath '%SYSTE
 
 rem Supprimer le fichier zip après extraction
 del "SDelete.zip"
-
-echo.
-
-rem Demander à l'utilisateur s'il souhaite créer un point de restauration
-set /p createRestorePoint=Voulez-vous créer un point de restauration avant le nettoyage ? (oui/non) :
-if /i "%createRestorePoint%"=="oui" (
-    echo Création d'un point de restauration...
-    wmic.exe /Namespace:\\root\default Path SystemRestore Call CreateRestorePoint "Point de restauration avant nettoyage", 100, 7
-    echo Point de restauration créé.
-) else (
-    echo Aucun point de restauration créé.
-)
 
 echo.
 
