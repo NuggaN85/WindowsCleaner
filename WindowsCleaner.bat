@@ -39,7 +39,9 @@ echo 9. Nettoyage des fichiers de cache du navigateur (Chrome, Firefox, Edge)
 echo 10. Nettoyage des fichiers de cache du système
 echo 11. Suppression des fichiers et cache de Microsoft Defender
 echo 12. Vérification de l'intégrité des fichiers système avec SFC
-echo 13. Tout exécuter
+echo 13. Nettoyage des fichiers de cache des applications
+echo 14. Vérification et réparation du disque avec CHKDSK
+echo 15. Tout exécuter
 echo.
 echo Entrez les numéros des étapes à exécuter (séparés par des virgules) :
 set /p CHOICE=
@@ -122,6 +124,16 @@ for %%C in (%CHOICE%) do (
         echo Vérification de l'intégrité des fichiers système terminée. >> %LOGFILE%
     )
     if "%%C"=="13" (
+        echo Nettoyage des fichiers de cache des applications... >> %LOGFILE%
+        rd /s /q "%LOCALAPPDATA%\Temp"
+        echo Fichiers de cache des applications nettoyés. >> %LOGFILE%
+    )
+    if "%%C"=="14" (
+        echo Vérification et réparation du disque avec CHKDSK... >> %LOGFILE%
+        chkdsk /f /r
+        echo Vérification et réparation du disque terminées. >> %LOGFILE%
+    )
+    if "%%C"=="15" (
         :: Exécuter toutes les étapes
         echo Exécution de toutes les étapes... >> %LOGFILE%
         call :EXECUTE_ALL
@@ -200,5 +212,13 @@ echo Fichiers et cache de Microsoft Defender supprimés. >> %LOGFILE%
 echo Vérification de l'intégrité des fichiers système avec SFC... >> %LOGFILE%
 sfc /scannow
 echo Vérification de l'intégrité des fichiers système terminée. >> %LOGFILE%
+
+echo Nettoyage des fichiers de cache des applications... >> %LOGFILE%
+rd /s /q "%LOCALAPPDATA%\Temp"
+echo Fichiers de cache des applications nettoyés. >> %LOGFILE%
+
+echo Vérification et réparation du disque avec CHKDSK... >> %LOGFILE%
+chkdsk /f /r
+echo Vérification et réparation du disque terminées. >> %LOGFILE%
 
 exit /b
