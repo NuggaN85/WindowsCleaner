@@ -101,3 +101,5 @@ Erreurs rencontrées : 0
 ---
 
 ✨ **Optimisez Windows en un clic !** ✨
+
+© 2024 Ludovic Rose. Tous droits réservés.
