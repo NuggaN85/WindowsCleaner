@@ -1,62 +1,103 @@
-### Description du Script
+# **Nettoyage Windows Complet - Script d'Optimisation Système**  
 
-Ce script batch Windows, est conçu pour effectuer un nettoyage sécurisé du système. Il automatise plusieurs tâches de maintenance pour libérer de l'espace disque et améliorer les performances du système. Voici un aperçu de ce que fait le script :
+![Windows Cleanup Script](https://img.shields.io/badge/Version-2.0-blue)  
+![License](https://img.shields.io/badge/License-MIT-green)  
+![Platform](https://img.shields.io/badge/Platform-Windows-lightgrey)  
 
-### Fonctionnalités du Script
+Un script Batch/CMD complet pour nettoyer, optimiser et maintenir votre système Windows.  
+**Idéal pour les techniciens informatiques et utilisateurs avancés.**  
 
-1. **Vérification des Privilèges Administrateur** : Le script commence par vérifier si l'utilisateur exécute le script avec des privilèges d'administrateur. Si ce n'est pas le cas, il affiche un message et se termine.
+---
 
-2. **Téléchargement et Extraction de SDelete** : Il télécharge l'outil SDelete de Microsoft Sysinternals, qui est utilisé pour supprimer de manière sécurisée les fichiers, et l'extrait dans un dossier nommé `Tools`.
+## **📝 Fonctionnalités Principales**  
 
-3. **Création d'un Point de Restauration** : Avant de procéder au nettoyage, le script crée un point de restauration système, permettant à l'utilisateur de restaurer le système à son état précédent si nécessaire.
+✅ **Nettoyage des fichiers temporaires** (Temp, Cache, Logs inutiles)  
+✅ **Nettoyage des navigateurs** (Chrome, Firefox, Edge)  
+✅ **Optimisation des disques** (SSD/HDD) avec défragmentation adaptée  
+✅ **Maintenance système** (SFC, DISM, CHKDSK)  
+✅ **Suppression des fichiers obsolètes** (Windows.old, fichiers .tmp)  
+✅ **Vidage de la corbeille et du cache DNS**  
+✅ **Nettoyage des journaux d'événements** (Event Logs)  
+✅ **Création automatique d'un point de restauration**  
+✅ **Calcul de l'espace disque libéré**  
+✅ **Journalisation détaillée (log)**  
 
-4. **Nettoyage des Fichiers Temporaires** : Utilise SDelete pour supprimer de manière sécurisée les fichiers temporaires dans divers répertoires système et utilisateur.
+---
 
-5. **Suppression des Fichiers de Pilotes Inutiles** : Supprime les fichiers des pilotes AMD, NVIDIA, et Intel qui ne sont plus nécessaires.
+## **⚙️ Installation et Utilisation**  
 
-6. **Nettoyage des Journaux d'Événements** : Efface les journaux d'événements Windows pour libérer de l'espace.
+### **📥 Téléchargement**  
+1. **Téléchargez le script** :  
+   ```bash
+   git clone https://github.com/votre-repo/windows-cleanup-tool.git
+   ```
+   Ou téléchargez directement `cleanup.bat`.  
 
-7. **Nettoyage des Fichiers de Mise à Jour Windows** : Supprime les fichiers de mise à jour Windows téléchargés.
+2. **Placez-le sur le Bureau** ou dans un dossier facile d'accès.  
 
-8. **Vidage de la Corbeille** : Vide la corbeille de manière forcée.
+### **▶️ Exécution**  
+1. **Ouvrir en tant qu'administrateur** (clic droit → *Exécuter en tant qu'administrateur*).  
+2. **Choisir une option** dans le menu interactif :  
+   - **Nettoyage de base** (fichiers temporaires, cache)  
+   - **Nettoyage système complet** (WinSxS, logs)  
+   - **Maintenance avancée** (SFC, DISM, CHKDSK)  
+   - **Nettoyage personnalisé** (choix manuel)  
 
-9. **Vidage du Cache DNS** : Efface le cache DNS pour résoudre les problèmes de résolution de noms de domaine.
+3. **Un rapport (log)** est généré sur le Bureau (`Nettoyage_Windows_Log_XXXX-XX-XX.txt`).  
 
-10. **Nettoyage des Fichiers de Cache du Navigateur** : Supprime les fichiers de cache du navigateur Chrome.
+---
 
-11. **Nettoyage des Fichiers de Cache du Système** : Utilise l'outil de nettoyage de disque intégré de Windows pour supprimer les fichiers de cache système.
+## **📊 Options du Script**  
 
-12. **Nettoyage des fichiers et cache de Microsoft Defender** : Supprime les fichiers et cache de Microsoft Defender.
+| Option | Description |
+|--------|-------------|
+| **1** | Nettoyage de base (fichiers temporaires, cache) |
+| **2** | Nettoyage des fichiers système (WinSxS, logs) |
+| **3** | Nettoyage des navigateurs (Chrome, Firefox, Edge) |
+| **4** | Maintenance système (SFC, DISM, CHKDSK) |
+| **5** | **Nettoyage complet** (toutes les options) |
+| **6** | Nettoyage personnalisé (choix manuel) |
+| **0** | Quitter |
 
-13. **Nettoyage Microsoft Office** : Ajout d'une étape pour nettoyer les fichiers temporaires de Microsoft Office.
+---
 
-14. **Optimisation des SSD** : Ajout d'une commande PowerShell pour optimiser les SSD.
+## **⚠️ Précautions**  
+- **Toujours exécuter en tant qu'administrateur** (requiert des droits élevés).  
+- **Un point de restauration est créé automatiquement** avant les modifications critiques.  
+- **Redémarrage recommandé** après certaines opérations (DISM, CHKDSK).  
 
-15. **Choix des étapes de nettoyage** : L'utilisateur peut choisir quelles étapes de nettoyage exécuter.
+---
 
-16. **Fichier de log** : Création d'un fichier de log sur le bureau pour enregistrer les actions effectuées par le script.
+## **📜 Licence**  
+Ce projet est sous licence **MIT**.  
+➡️ **Libre d'utilisation, modification et distribution.**  
 
-### Sécurité du Script
+---
 
-- **Vérification des Privilèges** : Le script s'assure qu'il est exécuté avec des privilèges administratifs pour éviter des erreurs d'exécution.
-- **Point de Restauration** : La création d'un point de restauration avant le nettoyage permet de restaurer le système en cas de problème.
-- **Suppression Sécurisée** : L'utilisation de SDelete garantit que les fichiers sont supprimés de manière sécurisée, rendant leur récupération difficile.
+## **📌 Contributions**  
+Les contributions sont les bienvenues !  
+- **Signaler un bug** → [Issues](https://github.com/NuggaN85/WindowsCleaner/issues)  
+- **Proposer une amélioration** → [Pull Requests](https://github.com/NuggaN85/WindowsCleaner/pulls)  
 
-### Risques Potentiels
+---
 
-- **Suppression de Fichiers Importants** : Bien que le script cible des fichiers temporaires et des caches, une mauvaise configuration ou une erreur pourrait entraîner la suppression de fichiers importants.
-- **Interruption des Services** : La suppression de certains fichiers ou dossiers pourrait interrompre des services ou applications en cours d'exécution.
+## **📊 Exemple de Résultat**  
+```text
+===================================
+RÉSUMÉ DU NETTOYAGE
+===================================
+Espace libéré : 4.2 Go
+Erreurs rencontrées : 0
+===================================
+```
+➡️ **Le rapport complet est enregistré dans le fichier log.**  
 
-### Conclusion
+---
 
-Ce script est utile pour automatiser le nettoyage de Windows, mais il doit être utilisé avec précaution. Il est recommandé de vérifier les chemins et les fichiers ciblés avant l'exécution pour éviter toute suppression accidentelle de données importantes.
+## **🔗 Téléchargement & Support**  
+📥 **[Télécharger la dernière version](https://github.com/NuggaN85/WindowsCleaner/releases)**  
+💬 **[Support & Discussions](https://github.com/NuggaN85/WindowsCleaner/discussions)**  
 
-### Informations
+---
 
-Ce script n'est pas associé à Microsoft. Il a été développé indépendamment et n'a aucune affiliation avec Microsoft ou ses produits. Pour toute question ou support concernant ce script, veuillez contacter son auteur ou consulter la documentation associée.
-
---------------------------------------------------------------------------------------------------------------------------------------
-
-[![Donate](https://img.shields.io/badge/paypal-donate-yellow.svg?style=flat)](https://www.paypal.me/nuggan85) [![v1.0.0](http://img.shields.io/badge/zip-v1.0.0-blue.svg)](https://github.com/NuggaN85/WindowsCleaner/archive/master.zip) [![GitHub license](https://img.shields.io/github/license/NuggaN85/WindowsCleaner)](https://github.com/NuggaN85/WindowsCleaner)
-
---------------------------------------------------------------------------------------------------------------------------------------
+✨ **Optimisez Windows en un clic !** ✨
