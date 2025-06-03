@@ -29,7 +29,7 @@ Un script Batch/CMD complet pour nettoyer, optimiser et maintenir votre système
 ### **📥 Téléchargement**  
 1. **Téléchargez le script** :  
    ```bash
-   git clone https://github.com/votre-repo/windows-cleanup-tool.git
+   git clone https://github.com/NuggaN85/WindowsCleaner.git
    ```
    Ou téléchargez directement `cleanup.bat`.  
 
