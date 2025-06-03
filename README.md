@@ -57,10 +57,6 @@ Ce script n'est pas associé à Microsoft. Il a été développé indépendammen
 
 --------------------------------------------------------------------------------------------------------------------------------------
 
-## <strong>❤️</strong> (Contribuer) <strong>❤️</strong>
-
-[![Donate](https://img.shields.io/badge/paypal-donate-yellow.svg?style=flat)](https://www.paypal.me/nuggan85) [![v1.0.0](http://img.shields.io/badge/zip-v1.0.0-blue.svg)](https://github.com/NuggaN85/WindowsCleaner/archive/master.zip) [![GitHub license](https://img.shields.io/github/license/NuggaN85/Protection-Anti-Plagiat)](https://github.com/NuggaN85/WindowsCleaner)
-
-<a target="_blank" href="https://www.dmca.com/Protection/Status.aspx?ID=e1725bf3-1ec4-44bb-b65e-0a20fd4919fa&refurl=https://github.com/NuggaN85/WindowsCleaner" title="DMCA.com Protection Status" class="dmca-badge"> <img src ="https://images.dmca.com/Badges/dmca_protected_sml_120d.png?ID=e1725bf3-1ec4-44bb-b65e-0a20fd4919fa"  alt="DMCA.com Protection Status" /></a>
+[![Donate](https://img.shields.io/badge/paypal-donate-yellow.svg?style=flat)](https://www.paypal.me/nuggan85) [![v1.0.0](http://img.shields.io/badge/zip-v1.0.0-blue.svg)](https://github.com/NuggaN85/WindowsCleaner/archive/master.zip) [![GitHub license](https://img.shields.io/github/license/NuggaN85/WindowsCleaner)](https://github.com/NuggaN85/WindowsCleaner)
 
 --------------------------------------------------------------------------------------------------------------------------------------
