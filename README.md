@@ -31,7 +31,7 @@ Un script Batch/CMD complet pour nettoyer, optimiser et maintenir votre système
    ```bash
    git clone https://github.com/NuggaN85/WindowsCleaner.git
    ```
-   Ou téléchargez directement `cleanup.bat`.  
+   Ou téléchargez directement `WindowsCleaner.bat`.  
 
 2. **Placez-le sur le Bureau** ou dans un dossier facile d'accès.  
 
