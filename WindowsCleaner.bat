@@ -1,224 +1,318 @@
 @echo off
 :: Script de nettoyage Windows complet
-:: Compatible avec CMD et PowerShell
-:: Auteur : RL Informatique
+:: Compatible CMD et PowerShell avec vérifications avancées
+:: Version 2.0 - RL Informatique
 
-:: Définir les variables
-set LOGFILE=%USERPROFILE%\Desktop\Nettoyage_Windows_Log.txt
+:: ########################################################
+:: ## Configuration initiale
+:: ########################################################
+
+:: Activation des extensions de commande
+setlocal enabledelayedexpansion
+
+:: ########################################################
+:: ## Vérifications préliminaires
+:: ########################################################
+
+:: Vérifier les privilèges admin
+net session >nul 2>&1
+if %errorLevel% neq 0 (
+    echo [ERREUR] Ce script doit être exécuté en tant qu'administrateur.
+    pause
+    exit /b
+)
+
+:: Détection du type de disque
+set DISK_TYPE=HDD
+for /f "tokens=*" %%a in ('wmic diskdrive get MediaType ^| find "SSD"') do set DISK_TYPE=SSD
+
+:: ########################################################
+:: ## Configuration des variables
+:: ########################################################
+
+set LOGFILE=%USERPROFILE%\Desktop\Nettoyage_Windows_Log_%date:~-4,4%-%date:~-7,2%-%date:~-10,2%_%time:~0,2%-%time:~3,2%.txt
 set CHOICE=
 set RESTORE_POINT=
 set RESTART=
+set SPACE_BEFORE=0
+set SPACE_AFTER=0
+set /a ERROR_COUNT=0
 
-:: Créer un fichier de log
-echo Log du nettoyage Windows > %LOGFILE%
-echo Date et heure : %date% %time% >> %LOGFILE%
+:: ########################################################
+:: ## Fonctions
+:: ########################################################
+
+:InitLog
+echo =================================== > %LOGFILE%
+echo LOG DE NETTOYAGE WINDOWS >> %LOGFILE%
+echo Date : %date% %time% >> %LOGFILE%
+echo Utilisateur : %USERNAME% >> %LOGFILE%
+echo Système : %COMPUTERNAME% >> %LOGFILE%
+echo Type de disque : %DISK_TYPE% >> %LOGFILE%
 echo =================================== >> %LOGFILE%
+echo. >> %LOGFILE%
+goto :EOF
 
-:: Demander à l'utilisateur s'il souhaite créer un point de restauration
+:LogInfo
+echo [%time%] [INFO] %* >> %LOGFILE%
+goto :EOF
+
+:LogWarning
+echo [%time%] [WARNING] %* >> %LOGFILE%
+goto :EOF
+
+:LogError
+echo [%time%] [ERREUR] %* >> %LOGFILE%
+set /a ERROR_COUNT+=1
+goto :EOF
+
+:CalculateSpace
+for /f "tokens=3" %%a in ('dir /-c %SystemDrive% ^| find "octets libres"') do set free=%%a
+set /a free=%free:~0,-8%
+exit /b %free%
+
+:ShowMenu
+cls
 echo.
-echo Voulez-vous créer un point de restauration avant de continuer ? (O/N)
-set /p RESTORE_POINT=
-if /I "%RESTORE_POINT%"=="O" (
-    echo Création d'un point de restauration... >> %LOGFILE%
-    powershell -Command "Checkpoint-Computer -Description 'Point de restauration avant nettoyage' -RestorePointType MODIFY_SETTINGS"
-    echo Point de restauration créé. >> %LOGFILE%
+echo #######################################################
+echo #                                                     #
+echo #              NETTOYAGE WINDOWS COMPLET              #
+echo #            Version 2.0 - RL Informatique            #
+echo #                                                     #
+echo #######################################################
+echo.
+echo Sélectionnez les options de nettoyage :
+echo.
+echo 1.  Nettoyage de base (fichiers temporaires, cache)
+echo 2.  Nettoyage des fichiers système (WinSxS, logs)
+echo 3.  Nettoyage des navigateurs (Chrome, Firefox, Edge)
+echo 4.  Maintenance système (SFC, DISM, CHKDSK)
+echo 5.  Nettoyage complet (toutes les options)
+echo 6.  Personnaliser le nettoyage
+echo.
+echo 0.  Quitter
+echo.
+set /p CHOICE=Choix : 
+goto :EOF
+
+:CreateRestorePoint
+call :LogInfo "Création d'un point de restauration..."
+powershell -Command "Checkpoint-Computer -Description 'Nettoyage Windows RL Info' -RestorePointType MODIFY_SETTINGS"
+if %errorLevel% neq 0 (
+    call :LogError "Échec de la création du point de restauration"
+) else (
+    call :LogInfo "Point de restauration créé avec succès"
+)
+goto :EOF
+
+:CleanTempFiles
+call :LogInfo "Nettoyage des fichiers temporaires..."
+rd /s /q %TEMP% 2>nul
+md %TEMP% 2>nul
+rd /s /q %WINDIR%\Temp 2>nul
+md %WINDIR%\Temp 2>nul
+del /s /q %SystemDrive%\*.tmp 2>nul
+del /s /q %SystemDrive%\*.temp 2>nul
+call :LogInfo "Fichiers temporaires nettoyés"
+goto :EOF
+
+:CleanSystemFiles
+call :LogInfo "Nettoyage des fichiers système..."
+dism /Online /Cleanup-Image /StartComponentCleanup /ResetBase
+dism /Online /Cleanup-Image /AnalyzeComponentStore
+cleanmgr /sagerun:1
+rd /s /q %SystemDrive%\Windows.old 2>nul
+call :LogInfo "Fichiers système nettoyés"
+goto :EOF
+
+:CleanBrowsers
+call :LogInfo "Nettoyage des navigateurs..."
+:: Chrome
+rd /s /q "%LOCALAPPDATA%\Google\Chrome\User Data\Default\Cache" 2>nul
+rd /s /q "%LOCALAPPDATA%\Google\Chrome\User Data\Default\Cookies" 2>nul
+
+:: Firefox
+for /d %%i in ("%APPDATA%\Mozilla\Firefox\Profiles\*") do (
+    rd /s /q "%%i\cache2" 2>nul
+    rd /s /q "%%i\thumbnails" 2>nul
 )
 
-:: Afficher les options de nettoyage
-echo.
-echo Sélectionnez les étapes de nettoyage à exécuter :
-echo 1. Nettoyage des fichiers temporaires
-echo 2. Nettoyage des fichiers de pilotes inutiles
-echo 3. Nettoyage des fichiers temporaires de Microsoft Office
-echo 4. Optimisation des SSD
-echo 5. Nettoyage des journaux d'événements
-echo 6. Nettoyage des fichiers de mise à jour Windows
-echo 7. Vider la corbeille
-echo 8. Vider le cache DNS
-echo 9. Nettoyage des fichiers de cache du navigateur (Chrome, Firefox, Edge)
-echo 10. Nettoyage des fichiers de cache du système
-echo 11. Suppression des fichiers et cache de Microsoft Defender
-echo 12. Vérification de l'intégrité des fichiers système avec SFC
-echo 13. Nettoyage des fichiers de cache des applications
-echo 14. Vérification et réparation du disque avec CHKDSK
-echo 15. Tout exécuter
-echo.
-echo Entrez les numéros des étapes à exécuter (séparés par des virgules) :
-set /p CHOICE=
+:: Edge
+rd /s /q "%LOCALAPPDATA%\Microsoft\Edge\User Data\Default\Cache" 2>nul
+call :LogInfo "Navigateurs nettoyés"
+goto :EOF
 
-:: Exécuter les étapes de nettoyage sélectionnées
-echo.
-echo Début du nettoyage... >> %LOGFILE%
-
-if "%CHOICE%"=="" (
-    echo Aucune étape sélectionnée. >> %LOGFILE%
-    goto END
+:SystemMaintenance
+call :LogInfo "Maintenance système en cours..."
+sfc /scannow
+dism /Online /Cleanup-Image /RestoreHealth
+if "%DISK_TYPE%"=="SSD" (
+    defrag /C /O /U /V
+) else (
+    defrag /C /U /V
 )
+chkdsk /f /r
+call :LogInfo "Maintenance système terminée"
+goto :EOF
 
-:: Vérifier chaque choix individuellement
-for %%C in (%CHOICE%) do (
-    if "%%C"=="1" (
-        echo Nettoyage des fichiers temporaires... >> %LOGFILE%
-        rd /s /q %TEMP%
-        md %TEMP%
-        echo Fichiers temporaires nettoyés. >> %LOGFILE%
-    )
-    if "%%C"=="2" (
-        echo Nettoyage des fichiers de pilotes inutiles... >> %LOGFILE%
-        pnputil.exe /delete-driver
-        echo Fichiers de pilotes inutiles nettoyés. >> %LOGFILE%
-    )
-    if "%%C"=="3" (
-        echo Nettoyage des fichiers temporaires de Microsoft Office... >> %LOGFILE%
-        rd /s /q %USERPROFILE%\AppData\Local\Temp\Office
-        echo Fichiers temporaires de Microsoft Office nettoyés. >> %LOGFILE%
-    )
-    if "%%C"=="4" (
-        echo Optimisation des SSD... >> %LOGFILE%
-        defrag /C /O
-        echo SSD optimisés. >> %LOGFILE%
-    )
-    if "%%C"=="5" (
-        echo Nettoyage des journaux d'événements... >> %LOGFILE%
-        wevtutil.exe clear-log Application
-        wevtutil.exe clear-log System
-        wevtutil.exe clear-log Security
-        echo Journaux d'événements nettoyés. >> %LOGFILE%
-    )
-    if "%%C"=="6" (
-        echo Nettoyage des fichiers de mise à jour Windows... >> %LOGFILE%
-        dism /Online /Cleanup-Image /StartComponentCleanup
-        echo Fichiers de mise à jour Windows nettoyés. >> %LOGFILE%
-    )
-    if "%%C"=="7" (
-        echo Vidage de la corbeille... >> %LOGFILE%
-        rd /s /q %SYSTEMDRIVE%\$Recycle.bin
-        echo Corbeille vidée. >> %LOGFILE%
-    )
-    if "%%C"=="8" (
-        echo Vidage du cache DNS... >> %LOGFILE%
-        ipconfig /flushdns
-        echo Cache DNS vidé. >> %LOGFILE%
-    )
-    if "%%C"=="9" (
-        echo Nettoyage des fichiers de cache du navigateur... >> %LOGFILE%
-        rd /s /q "%LOCALAPPDATA%\Google\Chrome\User Data\Default\Cache"
-        rd /s /q "%LOCALAPPDATA%\Mozilla\Firefox\Profiles"
-        rd /s /q "%LOCALAPPDATA%\Microsoft\Edge\User Data\Default\Cache"
-        echo Fichiers de cache du navigateur nettoyés. >> %LOGFILE%
-    )
-    if "%%C"=="10" (
-        echo Nettoyage des fichiers de cache du système... >> %LOGFILE%
-        rd /s /q %WINDIR%\Temp
-        md %WINDIR%\Temp
-        echo Fichiers de cache du système nettoyés. >> %LOGFILE%
-    )
-    if "%%C"=="11" (
-        echo Suppression des fichiers et cache de Microsoft Defender... >> %LOGFILE%
-        MpCmdRun.exe -RemoveDefinitions -All
-        echo Fichiers et cache de Microsoft Defender supprimés. >> %LOGFILE%
-    )
-    if "%%C"=="12" (
-        echo Vérification de l'intégrité des fichiers système avec SFC... >> %LOGFILE%
-        sfc /scannow
-        echo Vérification de l'intégrité des fichiers système terminée. >> %LOGFILE%
-    )
-    if "%%C"=="13" (
-        echo Nettoyage des fichiers de cache des applications... >> %LOGFILE%
-        rd /s /q "%LOCALAPPDATA%\Temp"
-        echo Fichiers de cache des applications nettoyés. >> %LOGFILE%
-    )
-    if "%%C"=="14" (
-        echo Vérification et réparation du disque avec CHKDSK... >> %LOGFILE%
-        chkdsk /f /r
-        echo Vérification et réparation du disque terminées. >> %LOGFILE%
-    )
-    if "%%C"=="15" (
-        :: Exécuter toutes les étapes
-        echo Exécution de toutes les étapes... >> %LOGFILE%
-        call :EXECUTE_ALL
-    )
-)
+:CleanRecycleBin
+call :LogInfo "Vidage de la corbeille..."
+rd /s /q %SYSTEMDRIVE%\$Recycle.bin 2>nul
+call :LogInfo "Corbeille vidée"
+goto :EOF
 
-:: Fin du nettoyage
-:END
-echo.
-echo Nettoyage terminé. >> %LOGFILE%
-echo =================================== >> %LOGFILE%
+:CleanDNS
+call :LogInfo "Vidage du cache DNS..."
+ipconfig /flushdns
+call :LogInfo "Cache DNS vidé"
+goto :EOF
 
-:: Demander à l'utilisateur s'il souhaite redémarrer l'ordinateur
-echo.
-echo Voulez-vous redémarrer l'ordinateur maintenant ? (O/N)
-set /p RESTART=
-if /I "%RESTART%"=="O" (
-    shutdown /r /t 0
-)
-
-:: Fin du script
-exit
-
-:: Sous-routine pour exécuter toutes les étapes
-:EXECUTE_ALL
-echo Nettoyage des fichiers temporaires... >> %LOGFILE%
-rd /s /q %TEMP%
-md %TEMP%
-echo Fichiers temporaires nettoyés. >> %LOGFILE%
-
-echo Nettoyage des fichiers de pilotes inutiles... >> %LOGFILE%
-pnputil.exe /delete-driver
-echo Fichiers de pilotes inutiles nettoyés. >> %LOGFILE%
-
-echo Nettoyage des fichiers temporaires de Microsoft Office... >> %LOGFILE%
-rd /s /q %USERPROFILE%\AppData\Local\Temp\Office
-echo Fichiers temporaires de Microsoft Office nettoyés. >> %LOGFILE%
-
-echo Optimisation des SSD... >> %LOGFILE%
-defrag /C /O
-echo SSD optimisés. >> %LOGFILE%
-
-echo Nettoyage des journaux d'événements... >> %LOGFILE%
+:CleanEventLogs
+call :LogInfo "Nettoyage des journaux d'événements..."
 wevtutil.exe clear-log Application
 wevtutil.exe clear-log System
 wevtutil.exe clear-log Security
-echo Journaux d'événements nettoyés. >> %LOGFILE%
+call :LogInfo "Journaux d'événements nettoyés"
+goto :EOF
 
-echo Nettoyage des fichiers de mise à jour Windows... >> %LOGFILE%
-dism /Online /Cleanup-Image /StartComponentCleanup
-echo Fichiers de mise à jour Windows nettoyés. >> %LOGFILE%
+:CleanThumbnails
+call :LogInfo "Nettoyage du cache des miniatures..."
+del /f /s /q %LOCALAPPDATA%\Microsoft\Windows\Explorer\thumbcache_*.db 2>nul
+call :LogInfo "Cache des miniatures nettoyé"
+goto :EOF
 
-echo Vidage de la corbeille... >> %LOGFILE%
-rd /s /q %SYSTEMDRIVE%\$Recycle.bin
-echo Corbeille vidée. >> %LOGFILE%
+:CompleteClean
+call :CleanTempFiles
+call :CleanSystemFiles
+call :CleanBrowsers
+call :SystemMaintenance
+call :CleanRecycleBin
+call :CleanDNS
+call :CleanEventLogs
+call :CleanThumbnails
+goto :EOF
 
-echo Vidage du cache DNS... >> %LOGFILE%
-ipconfig /flushdns
-echo Cache DNS vidé. >> %LOGFILE%
+:CustomClean
+echo.
+echo Sélectionnez les actions à effectuer (séparées par des virgules) :
+echo 1. Nettoyage fichiers temporaires
+echo 2. Nettoyage fichiers système
+echo 3. Nettoyage navigateurs
+echo 4. Maintenance système
+echo 5. Vider corbeille
+echo 6. Vider cache DNS
+echo 7. Nettoyer journaux événements
+echo 8. Nettoyer miniatures
+echo.
+set /p CUSTOM_CHOICE="Vos choix : "
 
-echo Nettoyage des fichiers de cache du navigateur... >> %LOGFILE%
-rd /s /q "%LOCALAPPDATA%\Google\Chrome\User Data\Default\Cache"
-rd /s /q "%LOCALAPPDATA%\Mozilla\Firefox\Profiles"
-rd /s /q "%LOCALAPPDATA%\Microsoft\Edge\User Data\Default\Cache"
-echo Fichiers de cache du navigateur nettoyés. >> %LOGFILE%
+for %%C in (%CUSTOM_CHOICE%) do (
+    if "%%C"=="1" call :CleanTempFiles
+    if "%%C"=="2" call :CleanSystemFiles
+    if "%%C"=="3" call :CleanBrowsers
+    if "%%C"=="4" call :SystemMaintenance
+    if "%%C"=="5" call :CleanRecycleBin
+    if "%%C"=="6" call :CleanDNS
+    if "%%C"=="7" call :CleanEventLogs
+    if "%%C"=="8" call :CleanThumbnails
+)
+goto :EOF
 
-echo Nettoyage des fichiers de cache du système... >> %LOGFILE%
-rd /s /q %WINDIR%\Temp
-md %WINDIR%\Temp
-echo Fichiers de cache du système nettoyés. >> %LOGFILE%
+:ShowSummary
+call :CalculateSpace
+set /a SPACE_AFTER=%errorlevel%
 
-echo Suppression des fichiers et cache de Microsoft Defender... >> %LOGFILE%
-MpCmdRun.exe -RemoveDefinitions -All
-echo Fichiers et cache de Microsoft Defender supprimés. >> %LOGFILE%
+set /a SPACE_GAINED=SPACE_AFTER-SPACE_BEFORE
 
-echo Vérification de l'intégrité des fichiers système avec SFC... >> %LOGFILE%
-sfc /scannow
-echo Vérification de l'intégrité des fichiers système terminée. >> %LOGFILE%
+echo. >> %LOGFILE%
+echo =================================== >> %LOGFILE%
+echo RÉSUMÉ DU NETTOYAGE >> %LOGFILE%
+echo =================================== >> %LOGFILE%
+echo Espace libéré : %SPACE_GAINED% Mo >> %LOGFILE%
+echo Erreurs rencontrées : %ERROR_COUNT% >> %LOGFILE%
+echo =================================== >> %LOGFILE%
 
-echo Nettoyage des fichiers de cache des applications... >> %LOGFILE%
-rd /s /q "%LOCALAPPDATA%\Temp"
-echo Fichiers de cache des applications nettoyés. >> %LOGFILE%
+echo.
+echo Résumé du nettoyage :
+echo ---------------------
+echo Espace libéré : %SPACE_GAINED% Mo
+echo Erreurs rencontrées : %ERROR_COUNT%
+echo.
+echo Le détail des opérations est disponible dans : %LOGFILE%
+goto :EOF
 
-echo Vérification et réparation du disque avec CHKDSK... >> %LOGFILE%
-chkdsk /f /r
-echo Vérification et réparation du disque terminées. >> %LOGFILE%
+:AskRestart
+echo.
+set /p RESTART="Voulez-vous redémarrer l'ordinateur maintenant ? (O/N) : "
+if /I "%RESTART%"=="O" (
+    shutdown /r /t 60 /c "Redémarrage dans 1 minute pour finaliser le nettoyage"
+    echo L'ordinateur va redémarrer dans 1 minute...
+)
+goto :EOF
 
+:: ########################################################
+:: ## Programme principal
+:: ########################################################
+
+:: Initialisation
+call :InitLog
+call :CalculateSpace
+set /a SPACE_BEFORE=%errorlevel%
+
+:: Affichage du menu
+:MAIN_MENU
+call :ShowMenu
+
+if "%CHOICE%"=="0" goto :EXIT
+if "%CHOICE%"=="1" goto :BASIC_CLEAN
+if "%CHOICE%"=="2" goto :SYSTEM_CLEAN
+if "%CHOICE%"=="3" goto :BROWSERS_CLEAN
+if "%CHOICE%"=="4" goto :MAINTENANCE
+if "%CHOICE%"=="5" goto :FULL_CLEAN
+if "%CHOICE%"=="6" goto :CUSTOM_CLEAN
+
+goto :MAIN_MENU
+
+:BASIC_CLEAN
+call :CreateRestorePoint
+call :CleanTempFiles
+call :CleanRecycleBin
+call :CleanDNS
+goto :SUMMARY
+
+:SYSTEM_CLEAN
+call :CreateRestorePoint
+call :CleanSystemFiles
+call :CleanEventLogs
+call :CleanThumbnails
+goto :SUMMARY
+
+:BROWSERS_CLEAN
+call :CleanBrowsers
+goto :SUMMARY
+
+:MAINTENANCE
+call :CreateRestorePoint
+call :SystemMaintenance
+goto :SUMMARY
+
+:FULL_CLEAN
+call :CreateRestorePoint
+call :CompleteClean
+goto :SUMMARY
+
+:CUSTOM_CLEAN
+call :CreateRestorePoint
+call :CustomClean
+goto :SUMMARY
+
+:SUMMARY
+call :ShowSummary
+call :AskRestart
+
+:EXIT
 exit /b
+
+:: ########################################################
+:: ## Fin du script
+:: ########################################################
