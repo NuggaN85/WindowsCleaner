@@ -1,18 +1,18 @@
 @echo off
 :: ========================================================
 :: Script de nettoyage Windows sécurisé
-:: Version 4.0 - RL Informatique
+:: Version 4.1 - RL Informatique
 :: ========================================================
 
 :: ==== INITIALISATION PROPRE =====
 setlocal DISABLEDELAYEDEXPANSION
 cd /d "%~dp0"
-title Nettoyage Windows v4.0
+title Nettoyage Windows v4.1
 
 :: ==== DÉTECTION DE RELANCE ====
 if "%RELOAD%"=="1" goto :MAIN
 set "RELOAD=1"
-cmd /c "%~f0" %*
+start "" /b cmd /c "%~f0" 
 exit /b
 
 :MAIN
@@ -32,7 +32,7 @@ set "LOCKFILE=%TEMP%\nettoyage_windows_%USERNAME%.lock"
 )
 
 :: ==== VARIABLES GLOBALES ====
-set "VERSION=4.0"
+set "VERSION=4.1"
 set "AUTHOR=RL Informatique"
 set "SAFE_MODE=1"
 set "CONFIRM_ALL=0"
@@ -404,6 +404,7 @@ echo.
 echo Nettoyage termine.
 
 :: ==== NETTOYAGE AVANT SORTIE ====
+:CLEAN_EXIT
 if exist "%LOCKFILE%" del "%LOCKFILE%" 2>nul
 endlocal
 endlocal
