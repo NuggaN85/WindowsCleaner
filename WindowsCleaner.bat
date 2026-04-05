@@ -1,7 +1,7 @@
 @echo off
 :: ========================================================
 :: Script de nettoyage Windows sécurisé
-:: Version 4.2 - RL Informatique (Optimisé)
+:: Version 4.2 - RL Informatique
 :: ========================================================
 
 :: ==== INITIALISATION PROPRE =====
