@@ -94,12 +94,6 @@ Pour signaler un problème, ouvrez une issue sur le dépôt.
 
 ---
 
-## **🔗 Téléchargement & Support**  
-📥 **[Télécharger la dernière version](https://github.com/NuggaN85/WindowsCleaner/releases)**  
-💬 **[Support & Discussions](https://github.com/NuggaN85/WindowsCleaner/discussions)**  
-
----
-
 ✨ **Optimisez Windows en un clic !** ✨
 
 © 2024 Ludovic Rose. Tous droits réservés.
