@@ -1,35 +1,33 @@
 @echo off
 :: ========================================================
 :: Script de nettoyage Windows sécurisé
-:: Version 4.2 - RL Informatique
+:: Version 4.3 - RL Informatique
 :: ========================================================
 
-:: ==== INITIALISATION PROPRE =====
-setlocal DISABLEDELAYEDEXPANSION
-cd /d "%~dp0"
-title Nettoyage Windows v4.2
-
-:: ==== VÉRIFICATION ADMIN (prioritaire) ====
+:: ==== VÉRIFICATION ADMIN (sans setlocal) ====
 net session >nul 2>&1
 if %errorLevel% neq 0 (
     echo [ERREUR] Droits administrateur requis
     echo.
     echo Relance automatique en tant qu'administrateur...
     timeout /t 2 /nobreak >nul
-    
+
     set "VBSFILE=%TEMP%\getadmin_%RANDOM%.vbs"
     (
         echo Set UAC = CreateObject^("Shell.Application"^)
         echo UAC.ShellExecute "%~s0", "", "", "runas", 1
-    ) > "!VBSFILE!"
-    start "" "!VBSFILE!"
-    del "!VBSFILE!" 2>nul
+    ) > "%VBSFILE%"
+    start "" "%VBSFILE%"
+    timeout /t 1 /nobreak >nul
+    del "%VBSFILE%" 2>nul
     exit /b
 )
 
 :: ==== INITIALISATION POST-ADMIN ====
 setlocal ENABLEDELAYEDEXPANSION
 chcp 65001 >nul 2>&1
+cd /d "%~dp0"
+title Nettoyage Windows v4.3
 
 :: ==== VERROUILLAGE ANTI-MULTIPLE ====
 set "LOCKFILE=%TEMP%\nettoyage_windows_%USERNAME%.lock"
@@ -40,23 +38,20 @@ if exist "!LOCKFILE!" (
     timeout /t 3 /nobreak >nul
     exit /b 1
 )
-
-:: ==== CRÉATION DU VERROUILLAGE ====
 (
     echo %date% %time%
 ) > "!LOCKFILE!"
 
 :: ==== VARIABLES GLOBALES ====
-set "VERSION=4.2"
+set "VERSION=4.3"
 set "AUTHOR=RL Informatique"
 set "SAFE_MODE=1"
 set "CONFIRM_ALL=0"
 set "ERROR_COUNT=0"
 set "WARNING_COUNT=0"
-set "USER_CONFIRM="
+set "SUCCESS_COUNT=0"
 set "SPACE_BEFORE=0"
 set "SPACE_AFTER=0"
-set "SUCCESS_COUNT=0"
 
 :: ==== CHEMINS DYNAMIQUES ====
 for /f "tokens=2 delims==" %%I in ('wmic os get localdatetime /value 2^>nul') do set "DATETIME=%%I"
@@ -65,25 +60,24 @@ set "BACKUP_DIR=%USERPROFILE%\Desktop\Backup_%DATETIME:~0,8%_%DATETIME:~8,4%"
 
 :: ==== DÉTECTION SYSTÈME ====
 set "OS_VERSION=Inconnu"
-for /f "tokens=3" %%I in ('ver ^| find "Windows"') do (
-    set "OS_VERSION=%%I"
-    echo !OS_VERSION! | find /i "10" >nul && set "OS_VALID=1"
-    echo !OS_VERSION! | find /i "11" >nul && set "OS_VALID=1"
-)
-if not defined OS_VALID (
+for /f "tokens=3" %%I in ('ver ^| find "Windows"') do set "OS_VERSION=%%I"
+echo !OS_VERSION! | find /i "10" >nul || echo !OS_VERSION! | find /i "11" >nul
+if errorlevel 1 (
     echo [ERREUR] Windows 10/11 requis
     timeout /t 3 /nobreak >nul
     goto :CLEAN_EXIT
 )
 
-:: ==== DÉTECTION DISQUE (optimisée) ====
+:: ==== DÉTECTION DISQUE ====
 set "DISK_TYPE=HDD"
 for /f "skip=1 tokens=2" %%a in ('wmic logicaldisk where "name='%SystemDrive:~0,2%'" get size 2^>nul') do (
     if %%a gtr 0 set "DISK_CAPACITY=%%a"
 )
 wmic diskdrive get mediatype 2>nul | find /i "SSD" >nul && set "DISK_TYPE=SSD"
 
-:: ==== FONCTIONS UTILITAIRES ====
+:: ============================================================
+:: FONCTIONS
+:: ============================================================
 
 :InitLog
 (
@@ -122,9 +116,14 @@ exit /b 0
 :GetFreeSpace
 setlocal ENABLEDELAYEDEXPANSION
 set "free_mb=0"
-for /f "tokens=3" %%a in ('dir /-c %SystemDrive% 2^>nul ^| find "libres"') do (
+for /f "tokens=2 delims==" %%a in ('wmic logicaldisk where "name='%SystemDrive:~0,2%'" get freespace /value 2^>nul ^| find "="') do (
     set "free_bytes=%%a"
     set "free_bytes=!free_bytes:,=!"
+    set /a "free_mb=!free_bytes! / 1048576"
+)
+if "!free_mb!"=="0" (
+    :: Fallback avec PowerShell si wmic échoue
+    for /f %%b in ('powershell -Command "Get-WmiObject -Class Win32_LogicalDisk -Filter \"DeviceID='%SystemDrive:~0,2%'\" | Select-Object -ExpandProperty FreeSpace"') do set "free_bytes=%%b"
     set /a "free_mb=!free_bytes! / 1048576"
 )
 endlocal & set "FREE_SPACE=%free_mb%"
@@ -189,30 +188,24 @@ exit /b 0
 
 :CleanTemp
 call :LogInfo "Nettoyage des fichiers temporaires..."
-setlocal ENABLEDELAYEDEXPANSION
-
 for %%D in ("%TEMP%" "%WINDIR%\Temp") do (
     if exist %%D (
         del /f /s /q "%%D\*.*" 2>nul
         for /d %%S in ("%%D\*") do rd /s /q "%%S" 2>nul
     )
 )
-
+:: Nettoyage du dossier Windows Update (toujours effectué)
 net stop wuauserv >nul 2>&1
-if !errorlevel! equ 0 (
-    rd /s /q "%WINDIR%\SoftwareDistribution\Download" 2>nul
-    md "%WINDIR%\SoftwareDistribution\Download" 2>nul
-    net start wuauserv >nul 2>&1
-)
-
-endlocal
+set "WU_STOPPED=0"
+if !errorlevel! equ 0 set "WU_STOPPED=1"
+rd /s /q "%WINDIR%\SoftwareDistribution\Download" 2>nul
+md "%WINDIR%\SoftwareDistribution\Download" 2>nul
+if !WU_STOPPED! equ 1 net start wuauserv >nul 2>&1
 call :LogSuccess "Fichiers temporaires nettoyés"
 exit /b 0
 
 :CleanSystem
 call :LogInfo "Nettoyage des fichiers système..."
-
-:: Nettoyage Windows.old
 if exist "%SystemDrive%\Windows.old" (
     call :AskUser "Supprimer Windows.old (~20GB) ?"
     if "!USER_CONFIRM!"=="O" (
@@ -220,52 +213,38 @@ if exist "%SystemDrive%\Windows.old" (
         call :LogSuccess "Windows.old supprimé"
     )
 )
-
-:: Nettoyage DISM
 dism /online /cleanup-image /startcomponentcleanup /resetbase >nul 2>&1
 if !errorlevel! equ 0 (
     call :LogSuccess "Image système nettoyée"
 ) else (
     call :LogWarning "Le nettoyage DISM a rencontré des problèmes"
 )
-
 exit /b 0
 
 :CleanBrowsers
 call :LogInfo "Nettoyage des navigateurs..."
-
-:: Fermeture sécurisée
 call :CloseProcessSafely "chrome.exe"
 call :CloseProcessSafely "firefox.exe"
 call :CloseProcessSafely "msedge.exe"
-
 timeout /t 2 /nobreak >nul
-
-:: Chrome
 if exist "%LOCALAPPDATA%\Google\Chrome\User Data\Default\Cache" (
     rd /s /q "%LOCALAPPDATA%\Google\Chrome\User Data\Default\Cache" 2>nul
     call :LogSuccess "Cache Chrome nettoyé"
 )
-
-:: Firefox
 for /d %%P in ("%APPDATA%\Mozilla\Firefox\Profiles\*") do (
     if exist "%%P\cache2" (
         rd /s /q "%%P\cache2" 2>nul
         call :LogSuccess "Cache Firefox nettoyé"
     )
 )
-
-:: Edge
 if exist "%LOCALAPPDATA%\Microsoft\Edge\User Data\Default\Cache" (
     rd /s /q "%LOCALAPPDATA%\Microsoft\Edge\User Data\Default\Cache" 2>nul
     call :LogSuccess "Cache Edge nettoyé"
 )
-
 exit /b 0
 
 :Maintenance
 call :LogInfo "Maintenance système..."
-
 echo Vérification intégrité système (SFC)...
 sfc /scannow >nul 2>&1
 if !errorlevel! equ 0 (
@@ -273,11 +252,8 @@ if !errorlevel! equ 0 (
 ) else (
     call :LogWarning "SFC: Certains fichiers n'ont pas pu être réparés"
 )
-
 echo Réparation image Windows (DISM)...
 dism /online /cleanup-image /restorehealth >nul 2>&1
-
-:: Optimisation disque
 if /i "!DISK_TYPE!"=="SSD" (
     echo Optimisation SSD (TRIM)...
     powershell -Command "Optimize-Volume -DriveLetter !SystemDrive:~0,1! -ReTrim -Verbose" >nul 2>&1
@@ -287,7 +263,6 @@ if /i "!DISK_TYPE!"=="SSD" (
     defrag !SystemDrive! /O /U >nul 2>&1
     call :LogSuccess "Disque défragmenté"
 )
-
 exit /b 0
 
 :CleanRecycle
@@ -312,15 +287,11 @@ exit /b 0
 :CleanEvents
 call :LogInfo "Nettoyage des journaux d'événements..."
 call :CreateBackupDir
-
-setlocal ENABLEDELAYEDEXPANSION
 for %%L in (Application System Security) do (
     wevtutil epl %%L "!BACKUP_DIR!\%%L.evtx" /ow:true 2>nul
     wevtutil clear-log %%L 2>nul
     call :LogSuccess "Journal %%L nettoyé et sauvegardé"
 )
-endlocal
-
 exit /b 0
 
 :CleanThumbs
@@ -361,6 +332,7 @@ echo S. Mode securise [!SAFE_MODE!]
 echo C. Confirmation auto [!CONFIRM_ALL!]
 echo 0. Quitter
 echo.
+set "CHOIX="
 set /p "CHOIX=Votre choix : "
 exit /b 0
 
@@ -423,7 +395,6 @@ echo.
     echo Avertissements : !WARNING_COUNT!
     echo Erreurs : !ERROR_COUNT!
 ) >> "!LOGFILE!"
-
 pause
 exit /b 0
 
@@ -435,7 +406,9 @@ shutdown /r /t 30 /c "Redemarrage suite au nettoyage Windows"
 echo Redemarrage dans 30 secondes...
 exit /b 0
 
-:: ==== PROGRAMME PRINCIPAL ====
+:: ============================================================
+:: PROGRAMME PRINCIPAL
+:: ============================================================
 
 call :InitLog
 call :GetFreeSpace
@@ -461,12 +434,22 @@ call :ShowMenu
 
 if "!CHOIX!"=="0" goto :FIN
 if /i "!CHOIX!"=="S" (
-    if "!SAFE_MODE!"=="1" (set "SAFE_MODE=0") else (set "SAFE_MODE=1")
-    call :LogInfo "Mode securise: !SAFE_MODE!"
+    if "!SAFE_MODE!"=="1" (
+        set "SAFE_MODE=0"
+        set "CONFIRM_ALL=1"
+    ) else (
+        set "SAFE_MODE=1"
+        set "CONFIRM_ALL=0"
+    )
+    call :LogInfo "Mode securise: !SAFE_MODE!, confirmation auto: !CONFIRM_ALL!"
     goto :LOOP
 )
 if /i "!CHOIX!"=="C" (
-    if "!CONFIRM_ALL!"=="1" (set "CONFIRM_ALL=0") else (set "CONFIRM_ALL=1")
+    if "!CONFIRM_ALL!"=="1" (
+        set "CONFIRM_ALL=0"
+    ) else (
+        set "CONFIRM_ALL=1"
+    )
     call :LogInfo "Confirmation auto: !CONFIRM_ALL!"
     goto :LOOP
 )
@@ -492,7 +475,6 @@ echo.
 :: ==== NETTOYAGE AVANT SORTIE ====
 :CLEAN_EXIT
 if exist "!LOCKFILE!" del "!LOCKFILE!" 2>nul
-endlocal
 endlocal
 timeout /t 2 /nobreak >nul
 exit /b
