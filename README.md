@@ -93,5 +93,3 @@ Pour signaler un problème, ouvrez une issue sur le dépôt.
 ---
 
 ✨ **Optimisez Windows en un clic !** ✨
-
-© 2024 Ludovic Rose. Tous droits réservés.
