@@ -1,8 +1,6 @@
 # 🛠️ **Nettoyage Windows Complet - Script d'Optimisation Système**  
 
-![Windows Cleanup Script](https://img.shields.io/badge/Version-4.3-blue)  
-![License](https://img.shields.io/badge/License-MIT-green)  
-![Platform](https://img.shields.io/badge/Platform-Windows-lightgrey)  
+![Windows Cleanup Script](https://img.shields.io/badge/Version-4.3-blue)  ![License](https://img.shields.io/badge/License-MIT-green)  ![Platform](https://img.shields.io/badge/Platform-Windows-lightgrey)  
 
 Un script Batch/CMD complet pour nettoyer, optimiser et maintenir votre système Windows.  
 **Idéal pour les techniciens informatiques et utilisateurs avancés.**  
