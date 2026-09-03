@@ -68,19 +68,6 @@ Un script Batch/CMD complet pour nettoyer, optimiser et maintenir votre système
 
 ---
 
-## **📜 Licence**  
-Ce projet est sous licence **MIT**.  
-➡️ **Libre d'utilisation, modification et distribution.**  
-
----
-
-## **📌 Contributions**  
-Les contributions sont les bienvenues !  
-- **Signaler un bug** → [Issues](https://github.com/NuggaN85/WindowsCleaner/issues)  
-- **Proposer une amélioration** → [Pull Requests](https://github.com/NuggaN85/WindowsCleaner/pulls)  
-
----
-
 ## **📊 Exemple de Résultat**  
 ```text
 ===================================
@@ -91,6 +78,19 @@ Erreurs rencontrées : 0
 ===================================
 ```
 ➡️ **Le rapport complet est enregistré dans le fichier log.**  
+
+---
+
+## 🛡️ Licence
+
+Ce script est fourni sous licence **MIT** – vous pouvez l’utiliser, le modifier et le redistribuer librement.
+
+---
+
+## 🤝 Contributions
+
+Les pull requests et suggestions d’amélioration sont les bienvenues.  
+Pour signaler un problème, ouvrez une issue sur le dépôt.
 
 ---
 
